@@ -3,11 +3,9 @@ require 'turn'
 require 'shoulda'
 
 require 'bronto'
-Bronto::Base.api_key = "800B6CB2-8709-4325-B338-8321897A11CA"
+Bronto::Base.api_key = ""
 
-Savon.configure do |config|
-  config.log = false
-end
+Savon.configure { |config| config.log = true }
 
 HTTPI.log = false
 

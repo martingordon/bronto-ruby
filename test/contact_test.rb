@@ -3,7 +3,7 @@ require 'test_helper'
 class ContactTest < Test::Unit::TestCase
   context "" do
     setup do
-      @contact = Bronto::Contact.new(email: "#{Time.now.to_i}-#{rand(1000)}@example.com")
+      @contact = Bronto::Contact.new(email: "#{Time.now.to_i}-#{rand(1000)}@example.com", status: "active")
     end
 
     teardown do
