@@ -15,4 +15,8 @@ Gem::Specification.new do |gem|
   gem.version       = Bronto::VERSION
 
   gem.add_dependency "savon"
+
+  gem.add_development_dependency "debugger"
+  gem.add_development_dependency "turn"
+  gem.add_development_dependency "shoulda"
 end
