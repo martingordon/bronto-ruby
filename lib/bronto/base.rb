@@ -153,6 +153,23 @@ module Bronto
       self.class.request(method, &block)
     end
 
+    def reload
+      return if self.id.blank?
+
+      # The block below is evaluated in a weird scope so we need to capture self as _self for use inside the block.
+      _self = self
+
+      resp = request(:read) do
+        soap.body = { filter: { id: _self.id } }
+      end
+
+      resp[:return].each do |k, v|
+        self.send("#{k}=", v) if self.respond_to? "#{k}="
+      end
+
+      nil
+    end
+
     # Saves the object. If the object has an ID, it is updated. Otherwise, it is created.
     def save
       id.blank? ? create : update
