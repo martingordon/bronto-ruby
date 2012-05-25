@@ -7,6 +7,7 @@ require "bronto/filter"
 require "bronto/list"
 require "bronto/version"
 
+require "core_ext/array"
 require "core_ext/object"
 require "core_ext/string"
 
