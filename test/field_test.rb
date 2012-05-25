@@ -60,7 +60,7 @@ class FieldTest < Test::Unit::TestCase
       @field.save
 
       filter = Bronto::Filter.new
-      filter.add_filter("email", "EndsWith", "example.com")
+      filter.add_filter("name", "StartsWith", "test")
 
       fields = Bronto::Field.find(filter)
 
