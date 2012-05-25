@@ -60,17 +60,19 @@ module Bronto
     # Saves a collection of Bronto::Base objects.
     # Objects without IDs are considered new and are `create`d; objects with IDs are considered existing and are `update`d.
     def self.save(*objs)
+      objs = objs.flatten
       update(objs.select { |o| o.errors.clear; o.id.present? })
       create(objs.select { |o| o.errors.clear; o.id.blank? })
+      objs
     end
 
     # Finds objects matching the `filter` (a Bronto::Filter instance).
-    def self.find(filter, page_number = 1)
+    def self.find(filter = Bronto::Filter.new, page_number = 1)
       resp = request(:read) do
         soap.body = { filter: filter.to_hash, page_number: page_number }
       end
 
-      Array(resp[:return]).map { |hash| new(hash) }
+      Array.wrap(resp[:return]).map { |hash| new(hash) }
     end
 
     # Tells the remote server to create the passed in collection of Bronto::Base objects.
@@ -79,20 +81,19 @@ module Bronto
     # Returns the same collection of objects that was passed in. Objects whose creation succeeded will be assigned the
     # ID returned from Bronto.
     def self.create(*objs)
+      objs = objs.flatten
+
       resp = request(:add) do
         soap.body = {
           plural_class_name => objs.map(&:to_hash)
         }
       end
 
-      results = resp[:return][:results]
-      results = [results] unless results.is_a? Array
-
-      results.each_with_index do |result, i|
+      Array.wrap(resp[:return][:results]).each_with_index do |result, i|
         if result[:is_new] and !result[:is_error]
           objs[i].id = result[:id]
         elsif result[:is_error]
-          objs[i].errors.add(error_code, result[:error_string])
+          objs[i].errors.add(result[:error_code], result[:error_string])
         end
       end
 
@@ -102,6 +103,7 @@ module Bronto
     # Updates a collection of Bronto::Base objects. The objects should exist on the remote server.
     # The object should implement `to_hash` to return a hash in the format expected by the SOAP API.
     def self.update(*objs)
+      objs = objs.flatten
       resp = request(:update) do
         soap.body = {
           plural_class_name => objs.map(&:to_hash)
@@ -116,7 +118,7 @@ module Bronto
     # Returns the same collection of objects that was passed in. Objects whose destruction succeeded will
     # have a nil ID.
     def self.destroy(*objs)
-      objs = objs.select { |o| o.id.present? }
+      objs = objs.flatten
 
       resp = request(:delete) do
         soap.body = {
@@ -124,12 +126,9 @@ module Bronto
         }
       end
 
-      results = resp[:return][:results]
-      results = [results] unless results.is_a? Array
-
-      results.each_with_index do |result, i|
+      Array.wrap(resp[:return][:results]).each_with_index do |result, i|
         if result[:is_error]
-          objs[i].errors.add(error_code, result[:error_string])
+          objs[i].errors.add(result[:error_code], result[:error_string])
         else
           objs[i].id = nil
         end
@@ -161,7 +160,8 @@ module Bronto
 
     # Creates the object. See `Bronto::Base.create` for more info.
     def create
-      self.class.create(self).first
+      res = self.class.create(self)
+      res.first
     end
 
     # Updates the object. See `Bronto::Base.update` for more info.

@@ -16,16 +16,16 @@ module Bronto
     attr_accessor :messages
 
     def initialize
-      messages = {}
+      self.messages = {}
     end
 
     def add(code, message)
       messages[code] = message
     end
 
-    def clear
-      messages.clear
-    end
+    def clear; messages.clear; end
+    def length; messages.length; end
+    def count; messages.count; end
 
     def to_a(include_codes = true)
       messages.map { |k,v| include_codes ? "#{v} (#{k})" : v }
