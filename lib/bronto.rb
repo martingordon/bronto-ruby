@@ -5,6 +5,7 @@ require "bronto/contact"
 require "bronto/field"
 require "bronto/filter"
 require "bronto/list"
+require "bronto/message"
 require "bronto/version"
 
 require "core_ext/array"
