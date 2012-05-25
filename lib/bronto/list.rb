@@ -42,4 +42,5 @@ module Bronto
       hash[:id] = id if id.present?
       hash
     end
+  end
 end
