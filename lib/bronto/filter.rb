@@ -12,7 +12,6 @@ module Bronto
     def to_hash
       hash = { type: type || "AND" }
       hash.merge(fields)
-      hash
     end
 
     # Accepts two or three arguments:
