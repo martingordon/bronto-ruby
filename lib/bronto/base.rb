@@ -64,7 +64,7 @@ module Bronto
       updates = []
       creates = []
 
-      objs.each do { |o| (o.id.present? ? updates : creates) << o }
+      objs.each { |o| (o.id.present? ? updates : creates) << o }
 
       update(updates) if updates.count > 0
       create(creates) if creates.count > 0
