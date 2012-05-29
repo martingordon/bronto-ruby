@@ -9,6 +9,11 @@ Savon.configure { |config| config.log = false }
 
 HTTPI.log = false
 
+def log_savon(&block)
+  Savon.configure { |config| config.log = true }
+  block.call()
+  Savon.configure { |config| config.log = false }
+end
 
 def reset_all
   types = [Bronto::Contact, Bronto::Field, Bronto::List, Bronto::Message]
