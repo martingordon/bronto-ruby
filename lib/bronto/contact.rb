@@ -20,6 +20,28 @@ module Bronto
       Array.wrap(resp[:return]).map { |hash| new(hash) }
     end
 
+    def self.save(*objs)
+      objs = objs.flatten
+
+      resp = request(:add_or_update) do
+        soap.body = {
+          plural_class_name => objs.map(&:to_hash)
+        }
+      end
+
+      objs.each { |o| o.errors.clear }
+
+      Array.wrap(resp[:return][:results]).each_with_index do |result, i|
+        if result[:is_new] and !result[:is_error]
+          objs[i].id = result[:id]
+        elsif result[:is_error]
+          objs[i].errors.add(result[:error_code], result[:error_string])
+        end
+      end
+
+      objs
+    end
+
     def initialize(options = {})
       self.fields = {}
       fields = options.delete(:fields)
