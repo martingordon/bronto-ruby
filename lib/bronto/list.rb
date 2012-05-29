@@ -12,6 +12,8 @@ module Bronto
         }
       end
 
+      lists.each { |l| l.reload }
+
       Array.wrap(resp[:return][:results]).select { |r| r[:is_error] }.count == 0
     end
 
