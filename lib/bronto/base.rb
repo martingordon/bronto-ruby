@@ -61,8 +61,13 @@ module Bronto
     # Objects without IDs are considered new and are `create`d; objects with IDs are considered existing and are `update`d.
     def self.save(*objs)
       objs = objs.flatten
-      update(objs.select { |o| o.id.present? })
-      create(objs.select { |o| o.id.blank? })
+      updates = []
+      creates = []
+
+      objs.each do { |o| (o.id.present? ? updates : creates) << o }
+
+      update(updates) if updates.count > 0
+      create(creates) if creates.count > 0
       objs
     end
 
