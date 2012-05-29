@@ -4,6 +4,8 @@ module Bronto
 
     # Removes all contacts from the given lists.
     def self.clear_lists(*lists)
+      lists = lists.flatten
+
       resp = request(:clear) do
         soap.body = {
           list: lists.map { |l| { id: l.id } }
@@ -21,6 +23,7 @@ module Bronto
     # Adds the given contacts to this list.
     def add_to_list(*contacts)
       return false if !self.id.present?
+      contacts = contacts.flatten
 
       # The block below is evaluated in a weird scope so we need to capture self as _self for use inside the block.
       _self = self
@@ -38,6 +41,7 @@ module Bronto
     # Removes the given contacts from this list.
     def remove_from_list(*contacts)
       return false if !self.id.present?
+      contacts = contacts.flatten
 
       resp = request("remove_from_list") do
         soap.body = {
