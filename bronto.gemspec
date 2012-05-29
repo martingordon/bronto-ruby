@@ -5,6 +5,7 @@ Gem::Specification.new do |gem|
   gem.authors       = ["Martin Gordon"]
   gem.email         = ["martingordon@gmail.com"]
   gem.description   = %q{A Ruby wrapper for the Bronto SOAP API}
+  gem.summary       = %q{A Ruby wrapper for the Bronto SOAP API}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($\)
