@@ -61,8 +61,8 @@ module Bronto
     # Objects without IDs are considered new and are `create`d; objects with IDs are considered existing and are `update`d.
     def self.save(*objs)
       objs = objs.flatten
-      update(objs.select { |o| o.errors.clear; o.id.present? })
-      create(objs.select { |o| o.errors.clear; o.id.blank? })
+      update(objs.select { |o| o.id.present? })
+      create(objs.select { |o| o.id.blank? })
       objs
     end
 
@@ -89,6 +89,8 @@ module Bronto
         }
       end
 
+      objs.each { |o| o.errors.clear }
+
       Array.wrap(resp[:return][:results]).each_with_index do |result, i|
         if result[:is_new] and !result[:is_error]
           objs[i].id = result[:id]
@@ -104,12 +106,14 @@ module Bronto
     # The object should implement `to_hash` to return a hash in the format expected by the SOAP API.
     def self.update(*objs)
       objs = objs.flatten
+
       resp = request(:update) do
         soap.body = {
           plural_class_name => objs.map(&:to_hash)
         }
       end
 
+      objs.each { |o| o.errors.clear }
       objs
     end
 
