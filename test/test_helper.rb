@@ -5,7 +5,7 @@ require 'shoulda'
 require 'bronto'
 Bronto::Base.api_key = ""
 
-Savon.configure { |config| config.log = true }
+Savon.configure { |config| config.log = false }
 
 HTTPI.log = false
 
