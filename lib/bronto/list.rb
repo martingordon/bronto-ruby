@@ -23,8 +23,16 @@ module Bronto
       self.active_count ||= 0
     end
 
-    # Adds the given contacts to this list.
     def add_to_list(*contacts)
+      begin
+        add_to_list!(contacts)
+      rescue Bronto::Error => e
+        false
+      end
+    end
+
+    # Adds the given contacts to this list.
+    def add_to_list!(*contacts)
       return false if !self.id.present?
       contacts = contacts.flatten
 
@@ -38,7 +46,12 @@ module Bronto
         }
       end
 
-      Array.wrap(resp[:return][:results]).select { |r| r[:is_error] }.count == 0
+      errors = Array.wrap(resp[:return][:results]).select { |r| r[:is_error] }
+      errors.each do |error|
+        raise Bronto::Error.new(error[:error_code], error[:error_string])
+      end
+
+      true
     end
 
     # Removes the given contacts from this list.
