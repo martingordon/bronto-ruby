@@ -2,6 +2,8 @@ module Bronto
   class Base
     attr_accessor :id, :api_key, :errors
 
+    @@api_key = nil
+
     # Getter/Setter for global API Key.
     def self.api_key=(api_key)
       @@api_key = api_key
