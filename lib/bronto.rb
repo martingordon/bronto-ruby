@@ -14,6 +14,23 @@ require "core_ext/object"
 require "core_ext/string"
 
 module Bronto
+  class Error < StandardError
+    attr_accessor :code, :message
+
+    def initialize(code, message)
+      self.code = code
+      self.message = message
+    end
+
+    def code=(new_code)
+      @code = new_code.to_i
+    end
+
+    def to_s
+      "#{code}: #{message}"
+    end
+  end
+
   class Errors
     attr_accessor :messages
 
