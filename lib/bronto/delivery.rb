@@ -11,6 +11,7 @@ module Bronto
     def self.find(filter = Bronto::Filter.new, page_number = 1, include_recipients = false, include_content = false, api_key = nil)
       body = { filter: filter.to_hash, page_number: page_number, include_recipients: include_recipients,
           include_content: include_content }
+      api_key = api_key || self.class.api_key
 
       resp = request(:read, api_key) do
         soap.body = body

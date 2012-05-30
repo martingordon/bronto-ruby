@@ -9,6 +9,7 @@ module Bronto
     # * `include_lists` determines whether to include the list IDs each contact belongs to.
     def self.find(filter = Bronto::Filter.new, page_number = 1, fields = nil, include_lists = false, api_key = nil)
       body = { filter: filter.to_hash, page_number: page_number }
+      api_key = api_key || self.api_key
 
       body[:fields] = Array.wrap(fields).map { |f| f.is_a?(Bronto::Field) ? f.id : f } if Array(fields).length > 0
       body[:include_lists] = include_lists
