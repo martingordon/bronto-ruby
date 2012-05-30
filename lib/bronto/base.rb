@@ -106,10 +106,10 @@ module Bronto
       objs.each { |o| o.errors.clear }
 
       Array.wrap(resp[:return][:results]).each_with_index do |result, i|
-        if result[:is_new] and !result[:is_error]
-          objs[i].id = result[:id]
-        elsif result[:is_error]
+        if result[:is_error]
           objs[i].errors.add(result[:error_code], result[:error_string])
+        else
+          objs[i].id = result[:id]
         end
       end
 
