@@ -51,6 +51,25 @@ module Bronto
       super(options)
     end
 
+    def reload
+      return false if self.email.blank?
+
+      filter = Bronto::Filter.new
+      filter.add_filter("email", "EqualTo", self.email)
+
+      new_contact = self.class.find(filter, 1, self.fields, true, self.api_key).first
+
+      self.id = new_contact.id
+      self.fields = new_contact.fields
+      self.list_ids = new_contact.list_ids
+
+      true
+    end
+
+    def save
+      self.class.save(self)
+    end
+
     def to_hash
       if id.present?
         { id: id, email: email, fields: fields.values.map(&:to_hash) }
