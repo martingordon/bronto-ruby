@@ -5,8 +5,9 @@ module Bronto
     # Removes all contacts from the given lists.
     def self.clear_lists(*lists)
       lists = lists.flatten
+      api_key = lists.first.is_a?(String) ? lists.shift : self.api_key
 
-      resp = request(:clear) do
+      resp = request(:clear, api_key) do
         soap.body = {
           list: lists.map { |l| { id: l.id } }
         }

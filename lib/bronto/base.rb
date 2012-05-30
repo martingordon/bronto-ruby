@@ -1,6 +1,6 @@
 module Bronto
   class Base
-    attr_accessor :id, :errors
+    attr_accessor :id, :api_key, :errors
 
     # Getter/Setter for global API Key.
     def self.api_key=(api_key)
@@ -22,8 +22,9 @@ module Bronto
     # If a symbol is passed in, it is converted to "method_plural_class_name" (e.g., :read => read_lists). A string
     # method is used as-is.
     # Pass in a block and assign a hash to soap.body with a structure appropriate to the method call.
-    def self.request(method, refresh_header = false, &_block)
-      _soap_header = self.soap_header(refresh_header)
+    def self.request(method, api_key = nil, refresh_header = false, &_block)
+      _soap_header = self.soap_header(api_key, refresh_header)
+      api_key = api_key || self.api_key
 
       method = "#{method}_#{plural_class_name}" if method.is_a? Symbol
 
@@ -47,11 +48,11 @@ module Bronto
 
     # Helper method to retrieve the session ID and return a SOAP header.
     # Will return a header with the same initial session ID unless the `refresh` argument is `true`.
-    def self.soap_header(refresh = false)
+    def self.soap_header(api_key, refresh = false)
       return @soap_header if !refresh and @soap_header.present?
 
       resp = api.request(:v4, :login) do
-        soap.body = { api_token: self.api_key }
+        soap.body = { api_token: api_key }
       end
 
       @soap_header = { "v4:sessionHeader" => { session_id: resp.body[:login_response][:return] } }
@@ -61,6 +62,8 @@ module Bronto
     # Objects without IDs are considered new and are `create`d; objects with IDs are considered existing and are `update`d.
     def self.save(*objs)
       objs = objs.flatten
+      api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
+
       updates = []
       creates = []
 
@@ -72,8 +75,10 @@ module Bronto
     end
 
     # Finds objects matching the `filter` (a Bronto::Filter instance).
-    def self.find(filter = Bronto::Filter.new, page_number = 1)
-      resp = request(:read) do
+    def self.find(filter = Bronto::Filter.new, page_number = 1, api_key = nil)
+      api_key = api_key || self.api_key
+
+      resp = request(:read, api_key) do
         soap.body = { filter: filter.to_hash, page_number: page_number }
       end
 
@@ -85,10 +90,12 @@ module Bronto
     #
     # Returns the same collection of objects that was passed in. Objects whose creation succeeded will be assigned the
     # ID returned from Bronto.
+    # The first element passed in can be a string containing the API key; if none passed, will fall back to the global key.
     def self.create(*objs)
       objs = objs.flatten
+      api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
 
-      resp = request(:add) do
+      resp = request(:add, api_key) do
         soap.body = {
           plural_class_name => objs.map(&:to_hash)
         }
@@ -109,10 +116,12 @@ module Bronto
 
     # Updates a collection of Bronto::Base objects. The objects should exist on the remote server.
     # The object should implement `to_hash` to return a hash in the format expected by the SOAP API.
+    # The first element passed in can be a string containing the API key; if none passed, will fall back to the global key.
     def self.update(*objs)
       objs = objs.flatten
+      api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
 
-      resp = request(:update) do
+      resp = request(:update, api_key) do
         soap.body = {
           plural_class_name => objs.map(&:to_hash)
         }
@@ -126,10 +135,13 @@ module Bronto
     #
     # Returns the same collection of objects that was passed in. Objects whose destruction succeeded will
     # have a nil ID.
+    #
+    # The first element passed in can be a string containing the API key; if none passed, will fall back to the global key.
     def self.destroy(*objs)
       objs = objs.flatten
+      api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
 
-      resp = request(:delete) do
+      resp = request(:delete, api_key) do
         soap.body = {
           plural_class_name => objs.map { |o| { id: o.id }}
         }
@@ -148,6 +160,7 @@ module Bronto
 
     # Accepts a hash whose keys should be setters on the object.
     def initialize(options = {})
+      self.api_key = self.class.api_key
       self.errors = Errors.new
       options.each { |k,v| send("#{k}=", v) if respond_to?("#{k}=") }
     end
@@ -159,7 +172,7 @@ module Bronto
 
     # Convenience instance method that calls the class `request` method.
     def request(method, &block)
-      self.class.request(method, &block)
+      self.class.request(method, self.api_key, false, &block)
     end
 
     def reload
@@ -186,18 +199,18 @@ module Bronto
 
     # Creates the object. See `Bronto::Base.create` for more info.
     def create
-      res = self.class.create(self)
+      res = self.class.create(self.api_key, self)
       res.first
     end
 
     # Updates the object. See `Bronto::Base.update` for more info.
     def update
-      self.class.update(self).first
+      self.class.update(self.api_key, self).first
     end
 
     # Destroys the object. See `Bronto::Base.destroy` for more info.
     def destroy
-      self.class.destroy(self).first
+      self.class.destroy(self.api_key, self).first
     end
   end
 end

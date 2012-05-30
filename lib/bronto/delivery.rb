@@ -8,11 +8,11 @@ module Bronto
     #    only that you should keep increasing the number until no more contacts are returned.
     # * `fields` can be an array of field IDs or an array of Field objects.
     # * `include_lists` determines whether to include the list IDs each contact belongs to.
-    def self.find(filter = Bronto::Filter.new, page_number = 1, include_recipients = false, include_content = false)
+    def self.find(filter = Bronto::Filter.new, page_number = 1, include_recipients = false, include_content = false, api_key = nil)
       body = { filter: filter.to_hash, page_number: page_number, include_recipients: include_recipients,
           include_content: include_content }
 
-      resp = request(:read) do
+      resp = request(:read, api_key) do
         soap.body = body
       end
 
