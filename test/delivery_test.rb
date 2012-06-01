@@ -35,8 +35,8 @@ class DeliveryTest < Test::Unit::TestCase
     end
 
     should "destroy a delivery" do
-      skip "API says we should be able to delete a delivery, but well-formed message returns an error."
       @delivery.message_id = @message.id
+      @delivery.add_recipient(@contact)
       @delivery.save
 
       assert_nothing_raised do
