@@ -19,17 +19,6 @@ class ContactTest < Test::Unit::TestCase
       assert_equal 0, @contact.errors.count
     end
 
-    should "get error on duplicate contact" do
-      @contact.save
-
-      c2 = Bronto::Contact.new(email: @contact.email)
-      c2.save
-
-      assert_equal nil, c2.id
-      assert_equal 1, c2.errors.count
-      assert_equal "305", c2.errors.messages.keys.first
-    end
-
     should "destroy a contact" do
       @contact.save
 
