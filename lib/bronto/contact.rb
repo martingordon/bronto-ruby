@@ -1,7 +1,6 @@
 module Bronto
   class Contact < Base
-    attr_accessor :email, :fields, :list_ids
-
+    attr_accessor :email, :fields, :list_ids, :created, :modified, :status, :num_opens, :num_clicks, :num_sends
     # Finds contacts based on the `filter` (Bronto::Filter object).
     # * `page_number` is the page of contacts to request. Bronto doesn't specify how many contacts are returned per page,
     #    only that you should keep increasing the number until no more contacts are returned.
