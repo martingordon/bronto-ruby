@@ -46,6 +46,10 @@ module Bronto
         wsdl.endpoint = "https://api.bronto.com/v4"
         wsdl.namespace = "http://api.bronto.com/v4"
       end
+      
+      @api.http.read_timeout = 600
+      
+      @api
     end
 
     # Helper method to retrieve the session ID and return a SOAP header.
