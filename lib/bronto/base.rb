@@ -1,8 +1,16 @@
 module Bronto
+
+  # According to Bronto's API documentation, the session credential returned by the
+  # login() API call remains active for 20 minutes.  In addition, the expiration time
+  # is reset after each successful use.  We will trigger a refresh before 20 minutes 
+  # to be on the safe side
+  SESSION_REUSE_SECONDS = 900
+
   class Base
     attr_accessor :id, :api_key, :errors
 
     @@api_key = nil
+    @@last_used = nil
 
     # Getter/Setter for global API Key.
     def self.api_key=(api_key)
@@ -35,6 +43,8 @@ module Bronto
         evaluate(&_block) if _block # See Savon::Client#evaluate; necessary to preserve scope.
       end
 
+      @@last_used = Time.now
+
       resp.body["#{method}_response".to_sym]
     end
 
@@ -46,24 +56,33 @@ module Bronto
         wsdl.endpoint = "https://api.bronto.com/v4"
         wsdl.namespace = "http://api.bronto.com/v4"
       end
-      
+
+      # Give Bronto up to 10 minutes to reply
       @api.http.read_timeout = 600
-      
+
       @api
     end
 
     # Helper method to retrieve the session ID and return a SOAP header.
-    # Will return a header with the same initial session ID unless the `refresh` argument is `true`.
+    # Will return a header with the same initial session ID unless the `refresh`
+    # argument is `true`.
     def self.soap_header(api_key, refresh = false)
-      # TODO: cache session id
-      # Force refresh for now...
-      # return @soap_header if !refresh and @soap_header.present?
+      return @soap_header if !refresh and @soap_header.present? and !session_expired
 
       resp = api.request(:v4, :login) do
         soap.body = { api_token: api_key }
       end
 
+      @@last_used = Time.now
       @soap_header = { "v4:sessionHeader" => { session_id: resp.body[:login_response][:return] } }
+    end
+
+    # returns true if a cached session identifier is missing or is too old
+    def self.session_expired
+      return true if (@@last_used == nil)
+      return true if (Time.now.tv_sec - @@last_used.tv_sec > SESSION_REUSE_SECONDS) 
+
+      false
     end
 
     # Saves a collection of Bronto::Base objects.
