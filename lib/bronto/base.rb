@@ -55,7 +55,9 @@ module Bronto
     # Helper method to retrieve the session ID and return a SOAP header.
     # Will return a header with the same initial session ID unless the `refresh` argument is `true`.
     def self.soap_header(api_key, refresh = false)
-      return @soap_header if !refresh and @soap_header.present?
+      # TODO: cache session id
+      # Force refresh for now...
+      # return @soap_header if !refresh and @soap_header.present?
 
       resp = api.request(:v4, :login) do
         soap.body = { api_token: api_key }
