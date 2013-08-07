@@ -4,7 +4,7 @@ module Bronto
   # login() API call remains active for 20 minutes.  In addition, the expiration time
   # is reset after each successful use.  We will trigger a refresh before 20 minutes 
   # to be on the safe side
-  SESSION_REUSE_SECONDS = 900
+  SESSION_REUSE_SECONDS = 120
 
   class Base
     attr_accessor :id, :api_key, :errors
