@@ -10,7 +10,6 @@ module Bronto
     attr_accessor :id, :api_key, :errors
 
     @@api_key = nil
-    @@last_used = nil
 
     # Getter/Setter for global API Key.
     def self.api_key=(api_key)
@@ -43,7 +42,7 @@ module Bronto
         evaluate(&_block) if _block # See Savon::Client#evaluate; necessary to preserve scope.
       end
 
-      @@last_used = Time.now
+      @last_used = Time.now
 
       resp.body["#{method}_response".to_sym]
     end
@@ -73,14 +72,14 @@ module Bronto
         soap.body = { api_token: api_key }
       end
 
-      @@last_used = Time.now
+      @last_used = Time.now
       @soap_header = { "v4:sessionHeader" => { session_id: resp.body[:login_response][:return] } }
     end
 
     # returns true if a cached session identifier is missing or is too old
     def self.session_expired
-      return true if (@@last_used == nil)
-      return true if (Time.now.tv_sec - @@last_used.tv_sec > SESSION_REUSE_SECONDS) 
+      return true if (@last_used == nil)
+      return true if (Time.now.tv_sec - @last_used.tv_sec > SESSION_REUSE_SECONDS) 
 
       false
     end
