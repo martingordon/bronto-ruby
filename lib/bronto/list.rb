@@ -7,11 +7,7 @@ module Bronto
       lists = lists.flatten
       api_key = lists.first.is_a?(String) ? lists.shift : self.api_key
 
-      resp = request(:clear, api_key) do
-        soap.body = {
-          list: lists.map { |l| { id: l.id } }
-        }
-      end
+      resp = request(:clear, {list: lists.map { |l| { id: l.id } }})
 
       lists.each { |l| l.reload }
 
@@ -39,12 +35,7 @@ module Bronto
       # The block below is evaluated in a weird scope so we need to capture self as _self for use inside the block.
       _self = self
 
-      resp = request("add_to_list") do
-        soap.body = {
-          list: { id: _self.id },
-          contacts: contacts.map { |c| { id: c.id } }
-        }
-      end
+      resp = request("add_to_list", {list: { id: _self.id }, contacts: contacts.map { |c| { id: c.id } }})
 
       errors = Array.wrap(resp[:return][:results]).select { |r| r[:is_error] }
       errors.each do |error|
@@ -59,12 +50,7 @@ module Bronto
       return false if !self.id.present?
       contacts = contacts.flatten
 
-      resp = request("remove_from_list") do
-        soap.body = {
-          list: self.to_hash,
-          contacts: contacts.map(&:to_hash)
-        }
-      end
+      resp = request("remove_from_list", {list: self.to_hash, contacts: contacts.map(&:to_hash)})
 
       Array.wrap(resp[:return][:results]).select { |r| r[:is_error] }.count == 0
     end

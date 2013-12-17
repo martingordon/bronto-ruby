@@ -13,9 +13,7 @@ module Bronto
           include_content: include_content }
       api_key = api_key || self.api_key
 
-      resp = request(:read, api_key) do
-        soap.body = body
-      end
+      resp = request(:read, body)
 
       Array.wrap(resp[:return]).map { |hash| new(hash) }
     end
@@ -27,7 +25,7 @@ module Bronto
 
     def to_hash
       hash = {
-        id: id, start: start, message_id: message_id, type: type, from_email: from_email, from_name: from_name,
+        id: id, start: start, message_id: message_id, from_email: from_email, from_name: from_name,
         reply_email: reply_email, recipients: recipients, fields: fields, authentication: authentication,
         reply_tracking: reply_tracking
       }
@@ -44,7 +42,7 @@ module Bronto
         [args.first.class.to_s.split("::").last.downcase, args.first.id]
       end
 
-      self.recipients << { type: type, id: id }
+      self.recipients << { id: id, type: type }
     end
   end
 end

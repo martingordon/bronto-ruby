@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 class DeliveryTest < Test::Unit::TestCase
   context "" do
@@ -11,9 +11,8 @@ class DeliveryTest < Test::Unit::TestCase
       @contact = Bronto::Contact.new(email: "#{Time.now.to_i}-#{rand(1000)}@example.com", status: "active")
       @contact.save
 
-      @delivery = Bronto::Delivery.new(start: Time.now, type: "normal", from_name: "Hello", from_email: "test@example.com")
-      @delivery_2 = Bronto::Delivery.new(start: Time.now + (60 * 60 * 24 * 5), type: "normal", from_name: "Hello",
-          from_email: "test2@example.com")
+      @delivery = Bronto::Delivery.new(start: Time.now.strftime("%Y-%m-%dT%H:%M:%S.%6N%:z"), from_name: "Hello", from_email: "test@example.com")
+      @delivery_2 = Bronto::Delivery.new(start: (Time.now + (60 * 60 * 24 * 5)).strftime("%Y-%m-%dT%H:%M:%S.%6N%:z"), from_name: "Hello", from_email: "test2@example.com")
     end
 
     teardown do
