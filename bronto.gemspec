@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Bronto::VERSION
 
-  gem.add_dependency "savon"
+  gem.add_dependency "savon", '1.2.0'
 
   gem.add_development_dependency "debugger"
   gem.add_development_dependency "turn"
