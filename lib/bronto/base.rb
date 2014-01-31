@@ -39,7 +39,7 @@ module Bronto
 
       resp = api.request(:v4, method.to_sym) do
         soap.header = _soap_header
-        evaluate(&_block) if _block # See Savon::Client#evaluate; necessary to preserve scope.
+        instance_eval(&_block) if _block # See Savon::Client#evaluate; necessary to preserve scope.
       end
 
       @last_used = Time.now
