@@ -20,4 +20,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "debugger"
   gem.add_development_dependency "turn"
   gem.add_development_dependency "shoulda"
+
+  s.homepage = "https://github.com/martingordon/bronto-ruby"
+  s.license = "MIT"
 end
