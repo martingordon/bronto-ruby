@@ -21,6 +21,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "turn"
   gem.add_development_dependency "shoulda"
 
-  s.homepage = "https://github.com/martingordon/bronto-ruby"
-  s.license = "MIT"
+  gem.homepage = "https://github.com/martingordon/bronto-ruby"
+  gem.license = "MIT"
 end
