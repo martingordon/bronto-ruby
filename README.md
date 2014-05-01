@@ -61,17 +61,21 @@ Let's setup some contacts, add them to a list, and then send them a message.
 
 4. Create a new message and add content:
 
+    ```
     message = Bronto::Message.new(name: "Test Message")
     message.add_content("html", "HTML Subject", "HTML Content")
     message.add_content("text", "Text Subject", "Text Content")
     message.save
+    ```
 
 5. Create a new delivery with a message and recipients and send it ASAP:
 
+    ```
     delivery = Bronto::Delivery.new(start: Time.now, type: "normal", from_name: "Test", from_email: "test@example.com")
     delivery.message_id = message.id
     delivery.add_recipient(list)
     delivery.save
+    ```
 
 ## Contributing
 
