@@ -59,9 +59,12 @@ module Bronto
       return false if !self.id.present?
       contacts = contacts.flatten
 
+      # The block below is evaluated in a weird scope so we need to capture self as _self for use inside the block.
+      _self = self
+
       resp = request("remove_from_list") do
         soap.body = {
-          list: self.to_hash,
+          list: _self.to_hash,
           contacts: contacts.map(&:to_hash)
         }
       end
