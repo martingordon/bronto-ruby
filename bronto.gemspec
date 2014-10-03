@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency "savon", '1.2.0'
 
-  gem.add_development_dependency "debugger"
+  gem.add_development_dependency "byebug"
   gem.add_development_dependency "turn"
   gem.add_development_dependency "shoulda"
 

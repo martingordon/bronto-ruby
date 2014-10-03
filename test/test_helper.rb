@@ -1,5 +1,5 @@
-require 'test/unit'
 require 'turn'
+require 'minitest/autorun'
 require 'shoulda'
 
 require_relative '../lib/bronto'
