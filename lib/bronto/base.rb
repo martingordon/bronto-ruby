@@ -2,7 +2,7 @@ module Bronto
 
   # According to Bronto's API documentation, the session credential returned by the
   # login() API call remains active for 20 minutes.  In addition, the expiration time
-  # is reset after each successful use.  We will trigger a refresh before 20 minutes 
+  # is reset after each successful use.  We will trigger a refresh before 20 minutes
   # to be on the safe side
   SESSION_REUSE_SECONDS = 120
 
@@ -26,60 +26,39 @@ module Bronto
     end
 
     # The primary method used to interface with the SOAP API.
-    # This method automatically adds the required session header and returns the actual response section of the SOAP response body.
     #
     # If a symbol is passed in, it is converted to "method_plural_class_name" (e.g., :read => read_lists). A string
     # method is used as-is.
-    # Pass in a block and assign a hash to soap.body with a structure appropriate to the method call.
-    def self.request(method, api_key = nil, refresh_header = false, &_block)
-      _soap_header = self.soap_header(api_key, refresh_header)
+    # The message is a hash and becomes the body of the SOAP request
+    def self.request(method, message = {})
       api_key = api_key || self.api_key
 
       method = "#{method}_#{plural_class_name}" if method.is_a? Symbol
 
-      resp = api.request(:v4, method.to_sym) do
-        soap.header = _soap_header
-        instance_eval(&_block) if _block # See Savon::Client#evaluate; necessary to preserve scope.
-      end
+      resp = api(api_key).call(method.to_sym, message: message)
 
       @last_used = Time.now
 
       resp.body["#{method}_response".to_sym]
     end
 
-    # Sets up the Savon SOAP client object (if necessary) and returns it.
-    def self.api
-      return @api unless @api.nil?
+    # Sets up the Savon SOAP client object, including sessionHeaders and returns the client.
+    def self.api(api_key, refresh = false)
+      return @api unless refresh || session_expired || @api.nil?
 
-      @api = Savon::Client.new do
-        wsdl.endpoint = "https://api.bronto.com/v4"
-        wsdl.namespace = "http://api.bronto.com/v4"
-      end
+      client = Savon.client(wsdl: 'https://api.bronto.com/v4?wsdl')
+      resp = client.call(:login, message: { api_token: api_key })
 
-      # Give Bronto up to 10 minutes to reply
-      @api.http.read_timeout = 600
-
-      @api
-    end
-
-    # Helper method to retrieve the session ID and return a SOAP header.
-    # Will return a header with the same initial session ID unless the `refresh`
-    # argument is `true`.
-    def self.soap_header(api_key, refresh = false)
-      return @soap_header if !refresh and @soap_header.present? and !session_expired
-
-      resp = api.request(:v4, :login) do
-        soap.body = { api_token: api_key }
-      end
-
-      @last_used = Time.now
-      @soap_header = { "v4:sessionHeader" => { session_id: resp.body[:login_response][:return] } }
+      @api = Savon.client(wsdl: 'https://api.bronto.com/v4?wsdl', soap_header: {
+                                                                   "tns:sessionHeader" => { session_id: resp.body[:login_response][:return] }
+                                                                  },
+                                                                  read_timeout: 600) # Give Bronto up to 10 minutes to reply
     end
 
     # returns true if a cached session identifier is missing or is too old
     def self.session_expired
       return true if (@last_used == nil)
-      return true if (Time.now.tv_sec - @last_used.tv_sec > SESSION_REUSE_SECONDS) 
+      return true if (Time.now.tv_sec - @last_used.tv_sec > SESSION_REUSE_SECONDS)
 
       false
     end
@@ -104,9 +83,7 @@ module Bronto
     def self.find(filter = Bronto::Filter.new, page_number = 1, api_key = nil)
       api_key = api_key || self.api_key
 
-      resp = request(:read, api_key) do
-        soap.body = { filter: filter.to_hash, page_number: page_number }
-      end
+      resp = request(:read, { filter: filter.to_hash, page_number: page_number })
 
       Array.wrap(resp[:return]).map { |hash| new(hash) }
     end
@@ -121,11 +98,7 @@ module Bronto
       objs = objs.flatten
       api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
 
-      resp = request(:add, api_key) do
-        soap.body = {
-          plural_class_name => objs.map(&:to_hash)
-        }
-      end
+      resp = request(:add, {plural_class_name => objs.map(&:to_hash)})
 
       objs.each { |o| o.errors.clear }
 
@@ -147,11 +120,7 @@ module Bronto
       objs = objs.flatten
       api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
 
-      resp = request(:update, api_key) do
-        soap.body = {
-          plural_class_name => objs.map(&:to_hash)
-        }
-      end
+      resp = request(:update, {plural_class_name => objs.map(&:to_hash)})
 
       objs.each { |o| o.errors.clear }
       objs
@@ -167,11 +136,7 @@ module Bronto
       objs = objs.flatten
       api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
 
-      resp = request(:delete, api_key) do
-        soap.body = {
-          plural_class_name => objs.map { |o| { id: o.id }}
-        }
-      end
+      resp = request(:delete, {plural_class_name => objs.map { |o| { id: o.id }}})
 
       Array.wrap(resp[:return][:results]).each_with_index do |result, i|
         if result[:is_error]
@@ -197,8 +162,8 @@ module Bronto
     end
 
     # Convenience instance method that calls the class `request` method.
-    def request(method, &block)
-      self.class.request(method, self.api_key, false, &block)
+    def request(method, message = {})
+      self.class.request(method, message)
     end
 
     def reload
@@ -207,9 +172,7 @@ module Bronto
       # The block below is evaluated in a weird scope so we need to capture self as _self for use inside the block.
       _self = self
 
-      resp = request(:read) do
-        soap.body = { filter: { id: _self.id } }
-      end
+      resp = request(:read, { filter: { id: _self.id } })
 
       resp[:return].each do |k, v|
         self.send("#{k}=", v) if self.respond_to? "#{k}="

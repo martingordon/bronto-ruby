@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 class ListTest < Test::Unit::TestCase
   context "" do
@@ -88,6 +88,9 @@ class ListTest < Test::Unit::TestCase
       assert_equal 0, @list.active_count
 
       assert @list.add_to_list(contact)
+
+      sleep(5)
+
       @list.reload
       assert_equal 1, @list.active_count
     end
@@ -105,10 +108,14 @@ class ListTest < Test::Unit::TestCase
       assert_equal 0, contact2.errors.count
 
       assert @list.add_to_list(contact, contact2)
+
+      sleep(5)
+
       @list.reload
       assert_equal 2, @list.active_count
 
       assert @list.remove_from_list(contact)
+
       @list.reload
       assert_equal 1, @list.active_count
     end
@@ -125,10 +132,16 @@ class ListTest < Test::Unit::TestCase
       assert_equal 0, contact2.errors.count
 
       assert @list.add_to_list(contact, contact2)
+
+      sleep(5)
+
       @list.reload
       assert_equal 2, @list.active_count
 
       assert Bronto::List.clear_lists(@list)
+
+      sleep(5)
+
       @list.reload
       assert_equal 0, @list.active_count
     end

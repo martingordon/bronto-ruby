@@ -1,17 +1,17 @@
 require "savon"
 
-require "bronto/base"
-require "bronto/contact"
-require "bronto/delivery"
-require "bronto/field"
-require "bronto/filter"
-require "bronto/list"
-require "bronto/message"
-require "bronto/version"
+require_relative "bronto/base"
+require_relative "bronto/contact"
+require_relative "bronto/delivery"
+require_relative "bronto/field"
+require_relative "bronto/filter"
+require_relative "bronto/list"
+require_relative "bronto/message"
+require_relative "bronto/version"
 
-require "core_ext/array"
-require "core_ext/object"
-require "core_ext/string"
+require_relative "core_ext/array"
+require_relative "core_ext/object"
+require_relative "core_ext/string"
 
 module Bronto
   class Error < StandardError
