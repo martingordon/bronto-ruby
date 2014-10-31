@@ -7,6 +7,7 @@ require_relative "bronto/field"
 require_relative "bronto/filter"
 require_relative "bronto/list"
 require_relative "bronto/message"
+require_relative "bronto/message_folder"
 require_relative "bronto/version"
 
 require_relative "core_ext/array"
