@@ -71,7 +71,7 @@ Let's setup some contacts, add them to a list, and then send them a message.
 5. Create a new delivery with a message and recipients and send it ASAP:
 
     ```
-    delivery = Bronto::Delivery.new(start: Time.now.strftime("%Y-%m-%dT%H:%M:%S.%6N%:z"), type: "normal", from_name: "Test", from_email: "test@example.com")
+    delivery = Bronto::Delivery.new(start: Time.now, type: "normal", from_name: "Test", from_email: "test@example.com")
     delivery.message_id = message.id
     delivery.add_recipient(list)
     delivery.save
