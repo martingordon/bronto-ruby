@@ -24,8 +24,16 @@ module Bronto
     end
 
     def to_hash
+      start_val = if start.is_a?(String)
+        start
+      elsif start.respond_to?(:strftime)
+        start.strftime("%Y-%m-%dT%H:%M:%S.%6N%:z")
+      else
+        start
+      end
+
       hash = {
-        id: id, start: start, message_id: message_id, from_email: from_email, from_name: from_name,
+        id: id, start: start_val, message_id: message_id, from_email: from_email, from_name: from_name,
         reply_email: reply_email, recipients: recipients, fields: fields, authentication: authentication,
         reply_tracking: reply_tracking
       }
