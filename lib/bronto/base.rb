@@ -41,25 +41,29 @@ module Bronto
 
       resp = api(api_key).call(method.to_sym, message: message)
 
-      @last_used = Time.now
+      connection_cache[api_key][:last_used] = Time.now
 
       resp.body["#{method}_response".to_sym]
     end
 
     # Sets up the Savon SOAP client object, including sessionHeaders and returns the client.
     def self.api(api_key, refresh = false)
-      return connection_cache[api_key] unless refresh || session_expired(api_key) || connection_cache[api_key].nil?
+      return connection_cache[api_key][:client] unless refresh || session_expired(api_key) || connection_cache[api_key].nil?
 
       client = Savon.client(wsdl: 'https://api.bronto.com/v4?wsdl', ssl_version: :TLSv1)
       resp = client.call(:login, message: { api_token: api_key })
 
-      connection_cache[api_key] = Savon.client(
-        wsdl: 'https://api.bronto.com/v4?wsdl',
-        soap_header: {
-          "tns:sessionHeader" => { session_id: resp.body[:login_response][:return] }
-        },
-        read_timeout: 600 # Give Bronto up to 10 minutes to reply
-      )
+      connection_cache[api_key] = {
+        client: Savon.client(
+          wsdl: 'https://api.bronto.com/v4?wsdl',
+          soap_header: {
+            "tns:sessionHeader" => { session_id: resp.body[:login_response][:return] }
+          },
+          read_timeout: 600 # Give Bronto up to 10 minutes to reply
+        ),
+        last_used: nil
+      }
+      connection_cache[api_key][:client]
     end
 
     # returns true if a cached session identifier is missing or is too old
