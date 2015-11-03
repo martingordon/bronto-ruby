@@ -20,6 +20,10 @@ module Bronto
       @@api_key
     end
 
+    def self.connection_cache
+      @@connection_cache ||= {}
+    end
+
     # Simple helper method to convert class name to downcased pluralized version (e.g., Field -> fields).
     def self.plural_class_name
       self.to_s.split("::").last.downcase.pluralize
@@ -44,21 +48,26 @@ module Bronto
 
     # Sets up the Savon SOAP client object, including sessionHeaders and returns the client.
     def self.api(api_key, refresh = false)
-      return @api unless refresh || session_expired || @api.nil?
+      return connection_cache[api_key] unless refresh || session_expired(api_key) || connection_cache[api_key].nil?
 
       client = Savon.client(wsdl: 'https://api.bronto.com/v4?wsdl', ssl_version: :TLSv1)
       resp = client.call(:login, message: { api_token: api_key })
 
-      @api = Savon.client(wsdl: 'https://api.bronto.com/v4?wsdl', soap_header: {
-                                                                   "tns:sessionHeader" => { session_id: resp.body[:login_response][:return] }
-                                                                  },
-                                                                  read_timeout: 600) # Give Bronto up to 10 minutes to reply
+      connection_cache[api_key] = Savon.client(
+        wsdl: 'https://api.bronto.com/v4?wsdl',
+        soap_header: {
+          "tns:sessionHeader" => { session_id: resp.body[:login_response][:return] }
+        },
+        read_timeout: 600 # Give Bronto up to 10 minutes to reply
+      )
     end
 
     # returns true if a cached session identifier is missing or is too old
-    def self.session_expired
-      return true if (@last_used == nil)
-      return true if (Time.now.tv_sec - @last_used.tv_sec > SESSION_REUSE_SECONDS)
+    def self.session_expired(api_key)
+      return true if (connection_cache[api_key].nil?)
+      last_used = connection_cache[api_key][:last_used]
+      return true if (last_used == nil)
+      return true if (Time.now.tv_sec - last_used.tv_sec > SESSION_REUSE_SECONDS)
 
       false
     end
