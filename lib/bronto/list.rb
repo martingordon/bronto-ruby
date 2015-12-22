@@ -17,6 +17,9 @@ module Bronto
     def initialize(options = {})
       super(options)
       self.active_count ||= 0
+      if !self.label.present?
+        self.label = self.name
+      end
     end
 
     def add_to_list(*contacts)
