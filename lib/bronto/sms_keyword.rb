@@ -43,7 +43,10 @@ module Bronto
       return false if !self.id.present?
       contacts = contacts.flatten
 
-      resp = request("remove_from_sms_keyword", {keyword: self.to_hash, contacts: contacts.map(&:to_hash)})
+      # The block below is evaluated in a weird scope so we need to capture self as _self for use inside the block.
+      _self = self
+
+      resp = request("remove_from_sms_keyword", {keyword: { id: _self.id }, contacts: contacts.map { |c| { id: c.id } } })
 
       Array.wrap(resp[:return][:results]).select { |r| r[:is_error] }.count == 0
     end
