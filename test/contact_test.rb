@@ -10,7 +10,7 @@ class ContactTest < Test::Unit::TestCase
       reset_all
     end
 
-    should "create a new contact" do
+    should "create a new contact by email" do
       assert_equal nil, @contact.id
 
       @contact.save
@@ -19,11 +19,30 @@ class ContactTest < Test::Unit::TestCase
       assert_equal 0, @contact.errors.count
     end
 
-    should "destroy a contact" do
+    should "destroy a contact by email" do
       @contact.save
 
       assert_nothing_raised do
         @contact.destroy
+      end
+    end
+
+    should "create a new contact by mobile number" do
+      c2 = Bronto::Contact.new(mobile_number: "1#{rand(1000000000)}")
+      assert_equal nil, c2.id
+
+      c2.save
+
+      assert_not_nil c2.id
+      assert_equal 0, c2.errors.count
+    end
+
+    should "destroy a contact by mobile number" do
+      c2 = Bronto::Contact.new(mobile_number: "1#{rand(1000000000)}")
+      c2.save
+
+      assert_nothing_raised do
+        c2.destroy
       end
     end
 
