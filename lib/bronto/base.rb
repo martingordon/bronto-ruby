@@ -29,6 +29,10 @@ module Bronto
       self.to_s.split("::").last.downcase.pluralize
     end
 
+    def self.object_name
+      plural_class_name
+    end
+
     # The primary method used to interface with the SOAP API.
     #
     # If a symbol is passed in, it is converted to "method_plural_class_name" (e.g., :read => read_lists). A string
@@ -111,7 +115,7 @@ module Bronto
       objs = objs.flatten
       api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
 
-      resp = request(:add, {plural_class_name => objs.map(&:to_hash)})
+      resp = request(:add, {object_name || plural_class_name => objs.map(&:to_hash)})
 
       objs.each { |o| o.errors.clear }
 
@@ -133,7 +137,7 @@ module Bronto
       objs = objs.flatten
       api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
 
-      resp = request(:update, {plural_class_name => objs.map(&:to_hash)})
+      resp = request(:update, {object_name || plural_class_name => objs.map(&:to_hash)})
 
       objs.each { |o| o.errors.clear }
       objs
@@ -149,7 +153,7 @@ module Bronto
       objs = objs.flatten
       api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
 
-      resp = request(:delete, {plural_class_name => objs.map { |o| { id: o.id }}})
+      resp = request(:delete, {object_name || plural_class_name => objs.map { |o| { id: o.id }}})
 
       Array.wrap(resp[:return][:results]).each_with_index do |result, i|
         if result[:is_error]

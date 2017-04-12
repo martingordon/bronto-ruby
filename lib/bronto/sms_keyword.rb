@@ -7,9 +7,15 @@ module Bronto
       'sms_keywords'
     end
 
+    def self.object_name
+      'keyword'
+    end
+
     def initialize(options = {})
       super(options)
       self.subscriber_count ||= 0
+      self.frequency_cap    ||= 30
+      self.keyword_type     ||= "basic"
     end
 
     def add_to_keyword(*contacts)
