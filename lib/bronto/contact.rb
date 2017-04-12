@@ -7,12 +7,14 @@ module Bronto
     #    only that you should keep increasing the number until no more contacts are returned.
     # * `fields` can be an array of field IDs or an array of Field objects.
     # * `include_lists` determines whether to include the list IDs each contact belongs to.
-    def self.find(filter = Bronto::Filter.new, page_number = 1, fields = nil, include_lists = false, api_key = nil)
+    # * `include_keywords` determines whether to include the SMS Keyword IDs each contact belongs to.
+    def self.find(filter: Bronto::Filter.new, page_number: 1, fields: nil, include_lists: false, include_keywords: false, api_key: nil)
       body = { filter: filter.to_hash, page_number: page_number }
       api_key = api_key || self.api_key
 
       body[:fields] = Array.wrap(fields).map { |f| f.is_a?(Bronto::Field) ? f.id : f } if Array(fields).length > 0
       body[:include_lists] = include_lists
+      body[:include_sms_keywords] = include_keywords
 
       resp = request(:read, body)
 
