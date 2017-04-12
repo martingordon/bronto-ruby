@@ -63,11 +63,11 @@ module Bronto
 
 
     def to_hash
-      hash = { name: name, description: description, subscriber_count: subscriber_count, frequency_cap: frequency_cap,
-               date_created: date_created, scheduled_delete_date: scheduled_delete_date, confirmation_message: confirmation_message,
+      hash = { name: name, description: description, frequency_cap: frequency_cap,
+               confirmation_message: confirmation_message,
                message_content: message_content, keyword_type: keyword_type }
       hash[:id] = id if id.present?
-      hash
+      hash.compact
     end
   end
 end
