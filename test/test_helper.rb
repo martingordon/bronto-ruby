@@ -8,7 +8,7 @@ Bronto::Base.api_key = ""
 HTTPI.log = false
 
 def reset_all
-  types = [Bronto::Contact, Bronto::Field, Bronto::List, Bronto::Message]
+  types = [Bronto::Contact, Bronto::Field, Bronto::List, Bronto::SMSKeyword, Bronto::Message]
 
   types.each do |type|
     objs = type.find
