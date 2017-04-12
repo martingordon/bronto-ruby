@@ -49,16 +49,19 @@ module Bronto
     end
 
     def reload
-      return false if self.email.blank?
+      return false if self.email.blank? && self.mobile_number.blank?
 
       filter = Bronto::Filter.new
-      filter.add_filter("email", "EqualTo", self.email)
+      filter.type = "OR"
+      filter.add_filter("email", "EqualTo", self.email) if self.email.present?
+      filter.add_filter("mobileNumber", "EqualTo", self.mobile_number) if self.mobile_number.present?
 
-      new_contact = self.class.find(filter, 1, self.fields, true, self.api_key).first
+      new_contact = self.class.find(filter, 1, self.fields, true, true, self.api_key).first
 
       self.id = new_contact.id
       self.fields = new_contact.fields
       self.list_ids = new_contact.list_ids
+      self.sms_keyword_ids = new_contact.sms_keyword_ids
 
       true
     end
