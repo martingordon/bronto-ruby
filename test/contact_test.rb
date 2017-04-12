@@ -28,7 +28,7 @@ class ContactTest < Test::Unit::TestCase
     end
 
     should "create a new contact by mobile number" do
-      c2 = Bronto::Contact.new(mobile_number: "1#{rand(1000000000)}")
+      c2 = Bronto::Contact.new(mobile_number: "1#{rand(1000000000..9999999999)}")
       assert_equal nil, c2.id
 
       c2.save
@@ -38,7 +38,7 @@ class ContactTest < Test::Unit::TestCase
     end
 
     should "destroy a contact by mobile number" do
-      c2 = Bronto::Contact.new(mobile_number: "1#{rand(1000000000)}")
+      c2 = Bronto::Contact.new(mobile_number: "1#{rand(1000000000..9999999999)}")
       c2.save
 
       assert_nothing_raised do
