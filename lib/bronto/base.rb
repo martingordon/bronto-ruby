@@ -186,10 +186,10 @@ module Bronto
     def reload
       return if self.id.blank?
 
-      # The block below is evaluated in a weird scope so we need to capture self as _self for use inside the block.
-      _self = self
+      filter = Filter.new
+      filter.add_filter(:id, self.id)
 
-      resp = request(:read, { filter: { id: _self.id } })
+      resp = request(:read, { filter: filter.to_hash, page_number: 1 })
 
       resp[:return].each do |k, v|
         self.send("#{k}=", v) if self.respond_to? "#{k}="
