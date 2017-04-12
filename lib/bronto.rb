@@ -12,6 +12,7 @@ require_relative "bronto/sms_keyword"
 require_relative "bronto/version"
 
 require_relative "core_ext/array"
+require_relative "core_ext/hash"
 require_relative "core_ext/object"
 require_relative "core_ext/string"
 
