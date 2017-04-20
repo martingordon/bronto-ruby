@@ -21,7 +21,7 @@ module Bronto
     def add_filter(*args)
       raise ArgumentError, "wrong number of arguments (#{args.length} for 2..3)" if args.length != 2 and args.length != 3
 
-      field = args.shift.to_sym
+      field = args.shift
       self.fields[field] = [] unless self.fields.has_key?(field)
 
       if args.length == 1
