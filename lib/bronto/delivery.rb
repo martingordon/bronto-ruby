@@ -35,7 +35,8 @@ module Bronto
       hash = {
         id: id, start: start_val, message_id: message_id, type: type, from_email: from_email, from_name: from_name,
         reply_email: reply_email, recipients: recipients, fields: fields, authentication: authentication,
-        reply_tracking: reply_tracking
+        reply_tracking: reply_tracking,
+        type: type,
       }
       hash.each { |k,v| hash.delete(k) if v.blank? }
       hash
