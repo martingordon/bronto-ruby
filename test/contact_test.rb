@@ -19,6 +19,16 @@ class ContactTest < Test::Unit::TestCase
       assert_equal 0, @contact.errors.count
     end
 
+    should "update contact status" do
+      assert_equal nil, @contact.id
+
+      @contact.status = 'unsub'
+      @contact.update
+
+      assert_not_nil @contact.id
+      assert_equal 0, @contact.errors.count
+    end
+
     should "destroy a contact" do
       @contact.save
 
