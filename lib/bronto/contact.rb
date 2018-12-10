@@ -84,11 +84,10 @@ module Bronto
     end
 
     def to_hash
-      if id.present?
-        { id: id, email: email, fields: fields.values.map(&:to_hash), status: status }
-      else
-        { email: email, fields: fields.values.map(&:to_hash), status: status }
-      end
+      obj = { email: email, fields: fields.values.map(&:to_hash) }
+      obj.merge!(id: id) if id.present?
+      obj.merge!(status: status) if status.present?
+      obj
     end
 
     def set_field(field, value)
